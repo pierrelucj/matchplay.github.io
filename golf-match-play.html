@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Golf Match Play Scorer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --color-bg:#ffffff;--color-bg2:#f5f5f4;--color-bg3:#eeede8;
+  --color-text:#1a1a18;--color-text2:#6b6b67;--color-text3:#9b9b97;
+  --color-border:rgba(0,0,0,0.12);--color-border2:rgba(0,0,0,0.22);
+  --color-bg-info:#e6f1fb;--color-text-info:#185fa5;
+  --color-bg-success:#e1f5ee;--color-text-success:#0f6e56;
+  --color-bg-warn:#faeeda;--color-text-warn:#854f0b;
+  --color-bg-danger:#fcebeb;--color-text-danger:#a32d2d;
+  --radius:8px;--radius-lg:12px;
+  --g:#0f6e56;--gl:#e1f5ee;--gm:#1d9e75;--gd:#085041;
+  --a:#ba7517;--al:#faeeda;
+  --r:#e24b4a;--rl:#fcebeb;
+  --b:#378add;--bl:#e6f1fb;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --color-bg:#1c1c1a;--color-bg2:#252523;--color-bg3:#2e2e2b;
+    --color-text:#f0efea;--color-text2:#a0a09a;--color-text3:#6b6b67;
+    --color-border:rgba(255,255,255,0.12);--color-border2:rgba(255,255,255,0.22);
+    --color-bg-info:#042c53;--color-text-info:#85b7eb;
+    --color-bg-success:#04342c;--color-text-success:#5dcaa5;
+    --color-bg-warn:#412402;--color-text-warn:#ef9f27;
+    --color-bg-danger:#501313;--color-text-danger:#f09595;
+    --gl:#04342c;--gm:#1d9e75;--gd:#5dcaa5;
+    --al:#412402;--a:#ef9f27;
+    --rl:#501313;--r:#f09595;
+    --bl:#042c53;--b:#85b7eb;
+  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--color-bg3);color:var(--color-text);font-size:14px;min-height:100vh}
+.screen{display:none;min-height:100vh;background:var(--color-bg3)}
+.screen.on{display:block}
+.hdr{background:var(--gd);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.hdr-title{font-size:16px;font-weight:500;flex:1}
+.hdr-sub{font-size:11px;opacity:.7;margin-top:1px}
+.back-btn,.icon-btn{background:rgba(255,255,255,0.15);border:none;color:#fff;cursor:pointer;padding:6px;border-radius:var(--radius);font-size:20px;line-height:1;display:flex;align-items:center;flex-shrink:0}
+.icon-btn-dark{background:var(--color-bg2);border:0.5px solid var(--color-border);color:var(--color-text);cursor:pointer;padding:6px 10px;border-radius:var(--radius);font-size:13px;line-height:1;display:inline-flex;align-items:center;gap:4px}
+.content{padding:12px 12px 100px}
+.card{background:var(--color-bg);border:0.5px solid var(--color-border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px}
+.card-lbl{font-size:11px;font-weight:500;color:var(--color-text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.btn{display:block;width:100%;padding:11px 14px;border-radius:var(--radius);font-size:14px;font-weight:500;cursor:pointer;border:none;text-align:center;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn-p{background:var(--gm);color:#fff}
+.btn-s{background:var(--color-bg2);color:var(--color-text);border:0.5px solid var(--color-border2)}
+.btn-d{background:var(--rl);color:var(--r);border:none}
+.btn-sm{width:auto;display:inline-block;padding:7px 12px;font-size:13px}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.pill-g{background:var(--gl);color:var(--gd)}
+.pill-a{background:var(--al);color:var(--a)}
+.pill-r{background:var(--rl);color:var(--r)}
+.pill-b{background:var(--bl);color:var(--b)}
+.pill-gray{background:var(--color-bg2);color:var(--color-text2);border:0.5px solid var(--color-border)}
+input[type=text],input[type=number],select,textarea{border:0.5px solid var(--color-border2);border-radius:var(--radius);padding:8px 10px;font-size:14px;background:var(--color-bg);color:var(--color-text);width:100%;outline:none;font-family:inherit}
+textarea{resize:vertical;font-family:monospace}
+input[type=number]{text-align:center}
+.p-row{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--color-bg2);border-radius:var(--radius);margin-bottom:6px}
+.avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#fff;flex-shrink:0}
+.p-row input[type=text]{background:transparent;border:none;flex:1;padding:0 6px}
+.p-row input[type=number]{width:48px;background:var(--color-bg);flex-shrink:0;padding:4px 6px}
+.hcp-lbl{font-size:10px;color:var(--color-text2);flex-shrink:0}
+.rm-btn{background:none;border:none;color:var(--color-text2);cursor:pointer;font-size:18px;line-height:1;padding:2px;flex-shrink:0}
+.add-btn{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px dashed var(--color-border2);border-radius:var(--radius);cursor:pointer;background:none;width:100%;color:var(--color-text2);font-size:13px;margin-bottom:10px}
+.holes-sel{display:flex;gap:8px}
+.h-btn{flex:1;padding:9px;border:1.5px solid var(--color-border);border-radius:var(--radius);background:var(--color-bg);cursor:pointer;font-size:14px;text-align:center;color:var(--color-text)}
+.h-btn.sel{border-color:var(--gm);background:var(--gl);color:var(--gd);font-weight:500}
+.mode-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.m-card{border:1.5px solid var(--color-border);border-radius:var(--radius-lg);padding:14px 10px;text-align:center;cursor:pointer;background:var(--color-bg)}
+.m-card.sel{border-color:var(--gm);background:var(--gl)}
+.m-card .ico{font-size:22px;margin-bottom:4px}
+.m-card .lbl{font-size:14px;font-weight:500;color:var(--color-text)}
+.m-card .desc{font-size:11px;color:var(--color-text2);margin-top:2px}
+.sc-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.sc{width:100%;border-collapse:collapse;font-size:12px}
+table.sc th{background:var(--gd);color:#fff;padding:6px 4px;text-align:center;font-weight:500;font-size:10px;white-space:nowrap}
+table.sc td{padding:5px 3px;text-align:center;border-bottom:0.5px solid var(--color-border)}
+.sc-inc{display:flex;align-items:center;justify-content:center;gap:2px}
+.sc-btn{width:26px;height:26px;border-radius:50%;border:0.5px solid var(--color-border2);background:var(--color-bg);cursor:pointer;font-size:15px;color:var(--color-text);display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.sc-num{font-size:14px;font-weight:500;min-width:18px;text-align:center;color:var(--color-text)}
+.won-r td:first-child{border-left:3px solid var(--gm)}
+.lost-r td:first-child{border-left:3px solid var(--r)}
+.halv-r td:first-child{border-left:3px solid var(--color-border)}
+.sb{background:var(--color-bg);border:0.5px solid var(--color-border);border-radius:var(--radius-lg);padding:12px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.sb-main{font-size:15px;font-weight:500;color:var(--color-text)}
+.sb-sub{font-size:12px;color:var(--color-text2);margin-top:2px}
+.match-pill{padding:4px 12px;border-radius:20px;font-size:13px;font-weight:500}
+.mp-up{background:var(--gl);color:var(--gd)}
+.mp-as{background:var(--color-bg2);color:var(--color-text2);border:0.5px solid var(--color-border)}
+.nav{background:var(--color-bg);border-top:0.5px solid var(--color-border);display:flex;padding:8px 0 env(safe-area-inset-bottom,12px);position:sticky;bottom:0;z-index:50}
+.nav-i{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;-webkit-tap-highlight-color:transparent}
+.nav-i i{font-size:22px;color:var(--color-text2)}
+.nav-i span{font-size:10px;color:var(--color-text2)}
+.nav-i.on i,.nav-i.on span{color:var(--gm)}
+.round-item{display:flex;align-items:center;gap:10px;padding:12px;background:var(--color-bg);border:0.5px solid var(--color-border);border-radius:var(--radius-lg);margin-bottom:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ri-icon{width:40px;height:40px;border-radius:var(--radius);background:var(--gl);display:flex;align-items:center;justify-content:center;color:var(--gd);font-size:20px;flex-shrink:0}
+.ri-info{flex:1;min-width:0}
+.ri-title{font-size:14px;font-weight:500;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-sub{font-size:12px;color:var(--color-text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.empty-state{text-align:center;padding:48px 20px;color:var(--color-text2)}
+.empty-state i{font-size:44px;display:block;margin-bottom:10px;opacity:.35}
+.scan-zone{border:1.5px dashed var(--color-border2);border-radius:var(--radius-lg);padding:28px;text-align:center;cursor:pointer;margin-bottom:10px;background:var(--color-bg2)}
+.scan-zone i{font-size:36px;color:var(--color-text2);display:block;margin-bottom:8px}
+.scan-zone p{font-size:13px;color:var(--color-text2)}
+.ai-bubble{border-radius:var(--radius-lg);padding:12px;margin-bottom:10px;font-size:13px}
+.ai-ok{background:var(--gl);color:var(--gd)}
+.ai-err{background:var(--rl);color:var(--r)}
+.ai-info{background:var(--bl);color:var(--b)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--gl);border-top-color:var(--gm);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tee-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:8px 0;border-bottom:0.5px solid var(--color-border)}
+.tee-row:last-child{border-bottom:none}
+.tee-color{width:16px;height:16px;border-radius:50%;flex-shrink:0;border:1px solid var(--color-border)}
+.stroke-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--a);margin-left:2px;vertical-align:middle}
+.info-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--color-border);font-size:13px}
+.info-row:last-child{border-bottom:none}
+.info-l{color:var(--color-text2)}
+.info-v{font-weight:500;color:var(--color-text)}
+.trophy-area{text-align:center;padding:20px 16px}
+.trophy-ico{font-size:48px;margin-bottom:8px}
+.winner-nm{font-size:20px;font-weight:500;color:var(--color-text);margin-bottom:4px}
+.winner-res{font-size:15px;color:var(--gm);font-weight:500;margin-bottom:4px}
+.course-chip{background:var(--color-bg2);border-radius:var(--radius);padding:4px 10px;font-size:12px;color:var(--color-text2);display:inline-flex;align-items:center;gap:4px;margin-bottom:8px}
+.delete-btn{background:var(--rl);color:var(--r);border:none;border-radius:var(--radius);padding:6px 10px;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:4px}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="s-home" class="screen on">
+  <div class="hdr">
+    <div style="flex:1"><div class="hdr-title">⛳ Match Play</div><div class="hdr-sub">Golf scorer</div></div>
+    <button class="icon-btn" onclick="showScreen('s-courses')" title="Courses" aria-label="Courses">
+      <i class="ti ti-map-pin"></i>
+    </button>
+  </div>
+  <div class="content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-size:13px;font-weight:500;color:var(--color-text2)">Rounds</span>
+      <button class="btn btn-sm btn-p" onclick="showScreen('s-setup')">
+        <i class="ti ti-plus" style="font-size:13px;margin-right:4px"></i>New round
+      </button>
+    </div>
+    <div id="rounds-list"></div>
+  </div>
+</div>
+
+<!-- COURSES LIST -->
+<div id="s-courses" class="screen">
+  <div class="hdr">
+    <button class="back-btn" onclick="showScreen('s-home')" aria-label="Back"><i class="ti ti-arrow-left"></i></button>
+    <div style="flex:1"><div class="hdr-title">Courses</div></div>
+    <button class="icon-btn" onclick="showScreen('s-scan')" title="Scan scorecard" aria-label="Scan scorecard">
+      <i class="ti ti-camera"></i>
+    </button>
+  </div>
+  <div class="content">
+    <div id="courses-list"></div>
+  </div>
+</div>
+
+<!-- SCAN -->
+<div id="s-scan" class="screen">
+  <div class="hdr">
+    <button class="back-btn" onclick="showScreen('s-courses')" aria-label="Back"><i class="ti ti-arrow-left"></i></button>
+    <div style="flex:1"><div class="hdr-title">Scan scorecard</div><div class="hdr-sub">AI-powered course import</div></div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-lbl">Upload scorecard image</div>
+      <div class="scan-zone" onclick="document.getElementById('scan-file').click()">
+        <i class="ti ti-camera-plus"></i>
+        <p>Tap to select scorecard photo</p>
+        <p style="font-size:11px;margin-top:4px;opacity:.6">JPEG, PNG supported</p>
+      </div>
+      <input type="file" id="scan-file" accept="image/*" style="display:none" onchange="handleScanFile(this)">
+      <div id="scan-preview"></div>
+      <div class="card-lbl" style="margin-top:8px">Or paste scorecard text</div>
+      <textarea id="scan-text" rows="5" placeholder="Paste scorecard text here (hole numbers, par, handicap index, distances for each tee)..."></textarea>
+    </div>
+    <button class="btn btn-p" id="scan-btn" onclick="runScan()">
+      <i class="ti ti-sparkles" style="font-size:14px;margin-right:6px"></i>Extract course data with AI
+    </button>
+    <div id="scan-status" style="margin-top:10px"></div>
+    <div id="scan-result"></div>
+  </div>
+</div>
+
+<!-- COURSE DETAIL -->
+<div id="s-course-view" class="screen">
+  <div class="hdr">
+    <button class="back-btn" onclick="showScreen('s-courses')" aria-label="Back"><i class="ti ti-arrow-left"></i></button>
+    <div style="flex:1"><div class="hdr-title" id="cv-title">Course</div></div>
+  </div>
+  <div class="content">
+    <div id="cv-content"></div>
+    <button class="btn btn-d" onclick="deleteCourse()">
+      <i class="ti ti-trash" style="font-size:14px;margin-right:6px"></i>Delete course
+    </button>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div id="s-setup" class="screen">
+  <div class="hdr">
+    <button class="back-btn" onclick="showScreen('s-home')" aria-label="Back"><i class="ti ti-arrow-left"></i></button>
+    <div style="flex:1"><div class="hdr-title">New round</div></div>
+  </div>
+  <div class="content">
+    <div class="card">
+      <div class="card-lbl">Course (optional)</div>
+      <select id="course-sel" onchange="onCourseSelect()">
+        <option value="">No course / custom pars</option>
+      </select>
+      <div id="tee-sel-wrap" style="margin-top:10px;display:none">
+        <div class="card-lbl">Tee set</div>
+        <select id="tee-sel" onchange="onTeeSelect()"></select>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Format</div>
+      <div class="mode-row">
+        <div class="m-card sel" id="mode-singles" onclick="setMode('singles')">
+          <div class="ico">🧍</div><div class="lbl">Singles</div><div class="desc">1v1 or multi</div>
+        </div>
+        <div class="m-card" id="mode-teams" onclick="setMode('teams')">
+          <div class="ico">👥</div><div class="lbl">Teams</div><div class="desc">2v2 — 4v4</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-lbl">Players <span style="font-weight:400;text-transform:none;font-size:11px">(2–8)</span></div>
+      <div id="p-list"></div>
+      <button class="add-btn" id="add-p-btn" onclick="addPlayer()">
+        <i class="ti ti-plus"></i> Add player
+      </button>
+      <div class="card-lbl" style="margin-top:4px">Holes</div>
+      <div class="holes-sel">
+        <button class="h-btn sel" onclick="setHoles(9,this)">9 holes</button>
+        <button class="h-btn" onclick="setHoles(18,this)">18 holes</button>
+      </div>
+    </div>
+    <button class="btn btn-p" onclick="startRound()">Start round →</button>
+  </div>
+</div>
+
+<!-- SCORING -->
+<div id="s-scoring" class="screen">
+  <div class="hdr">
+    <button class="back-btn" onclick="saveAndExit()" aria-label="Save and exit"><i class="ti ti-arrow-left"></i></button>
+    <div style="flex:1"><div class="hdr-title" id="sc-hdr">Scoring</div><div class="hdr-sub" id="sc-sub">Hole 1</div></div>
+  </div>
+  <div id="scoring-content" style="padding:12px 12px 80px">
+    <div class="sb" id="sb">
+      <div><div class="sb-main" id="sb-main">All Square</div><div class="sb-sub" id="sb-sub"></div></div>
+      <div class="match-pill mp-as" id="sb-pill">AS</div>
+    </div>
+    <div class="sc-wrap">
+      <table class="sc" id="sc-table">
+        <thead id="sc-head"></thead>
+        <tbody id="sc-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="tab-summary" style="display:none;padding:12px 12px 80px">
+    <div class="card trophy-area" id="sum-result"></div>
+    <div class="card" id="sum-detail"></div>
+  </div>
+  <div class="nav">
+    <div class="nav-i on" id="nav-score" onclick="switchTab('scoring')">
+      <i class="ti ti-golf"></i><span>Scoring</span>
+    </div>
+    <div class="nav-i" id="nav-sum" onclick="switchTab('summary')">
+      <i class="ti ti-chart-bar"></i><span>Summary</span>
+    </div>
+    <div class="nav-i" id="nav-done" onclick="finishRound()">
+      <i class="ti ti-flag"></i><span>Finish</span>
+    </div>
+  </div>
+</div>
+
+<!-- ROUND DETAIL (view saved round) -->
+<div id="s-round-view" class="screen">
+  <div class="hdr">
+    <button class="back-btn" onclick="showScreen('s-home')" aria-label="Back"><i class="ti ti-arrow-left"></i></button>
+    <div style="flex:1"><div class="hdr-title" id="rv-title">Round</div><div class="hdr-sub" id="rv-sub"></div></div>
+    <button class="icon-btn" id="rv-resume-btn" onclick="resumeRound()" title="Resume" aria-label="Resume round">
+      <i class="ti ti-player-play"></i>
+    </button>
+  </div>
+  <div class="content">
+    <div id="rv-content"></div>
+    <button class="btn btn-d" style="margin-top:8px" onclick="deleteRound()">
+      <i class="ti ti-trash" style="font-size:14px;margin-right:6px"></i>Delete round
+    </button>
+  </div>
+</div>
+
+<script>
+// ─── Constants ─────────────────────────────────────────────────────────────
+const AC = ['#0f6e56','#378add','#ba7517','#d4537e','#639922','#534ab7','#d85a30','#085041'];
+const PAR9   = [4,3,4,5,3,4,4,5,4];
+const PAR18  = [4,3,4,5,3,4,4,5,4,4,3,4,5,3,4,4,5,4];
+const HCP9   = [1,5,3,7,9,2,6,8,4];
+const HCP18  = [1,15,7,11,3,13,5,9,17,2,16,8,12,4,14,6,10,18];
+const TEE_COLORS = {black:'#222',blue:'#378add',white:'#c8c8c8',red:'#e24b4a',gold:'#ba7517',green:'#1d9e75',silver:'#888'};
+
+// ─── State ─────────────────────────────────────────────────────────────────
+let G = freshState();
+let pidC = 0;
+let viewingRoundId = null;
+let viewingCourseId = null;
+let scanImageB64 = null;
+
+function freshState() {
+  return { mode:'singles', holes:9, players:[], scores:{}, results:{},
+    courseId:null, courseName:null, teeSet:null, holePars:null, holeHcps:null, id:null };
+}
+
+// ─── Storage helpers ────────────────────────────────────────────────────────
+const LS = {
+  get(key) { try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch { return null; } },
+  set(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) { console.warn('Storage full', e); } },
+  del(key) { try { localStorage.removeItem(key); } catch {} },
+  keys(prefix) { try { return Object.keys(localStorage).filter(k => k.startsWith(prefix)); } catch { return []; } }
+};
+
+// ─── Screen routing ─────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+  if (id === 's-home') renderRoundsList();
+  if (id === 's-courses') renderCoursesList();
+  if (id === 's-setup') populateCourseSelect();
+}
+
+// ─── Rounds list ────────────────────────────────────────────────────────────
+function renderRoundsList() {
+  const el = document.getElementById('rounds-list');
+  const keys = LS.keys('round:');
+  if (!keys.length) {
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-golf"></i><p>No rounds yet.<br>Tap "+ New round" to start.</p></div>';
+    return;
+  }
+  const rounds = keys.map(k => LS.get(k)).filter(Boolean);
+  rounds.sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
+  el.innerHTML = '';
+  rounds.forEach(r => {
+    const d = new Date(r.updatedAt || r.createdAt || Date.now());
+    const dateStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    const names = (r.players||[]).map(p => p.name).join(', ');
+    const statusPill = r.finished
+      ? '<span class="pill pill-g">Finished</span>'
+      : '<span class="pill pill-a">In progress</span>';
+    const div = document.createElement('div');
+    div.className = 'round-item';
+    div.onclick = () => viewRound(r.id);
+    div.innerHTML = `
+      <div class="ri-icon"><i class="ti ti-golf"></i></div>
+      <div class="ri-info">
+        <div class="ri-title">${escH(r.courseName || 'Custom round')}</div>
+        <div class="ri-sub">${escH(names)}</div>
+      </div>
+      <div class="ri-right">${statusPill}<span style="font-size:11px;color:var(--color-text2)">${dateStr} · ${r.holes}H</span></div>`;
+    el.appendChild(div);
+  });
+}
+
+// ─── Courses list ────────────────────────────────────────────────────────────
+function renderCoursesList() {
+  const el = document.getElementById('courses-list');
+  const keys = LS.keys('course:');
+  if (!keys.length) {
+    el.innerHTML = '<div class="empty-state"><i class="ti ti-map-pin"></i><p>No courses saved.<br>Tap the camera icon to scan a scorecard.</p></div>';
+    return;
+  }
+  const courses = keys.map(k => LS.get(k)).filter(Boolean);
+  el.innerHTML = '';
+  courses.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'round-item';
+    div.onclick = () => viewCourse(c.id);
+    div.innerHTML = `
+      <div class="ri-icon" style="background:var(--bl);color:var(--b)"><i class="ti ti-map-2"></i></div>
+      <div class="ri-info">
+        <div class="ri-title">${escH(c.name)}</div>
+        <div class="ri-sub">${c.holes||18} holes · ${(c.teeSets||[]).length} tee set(s)</div>
+      </div>
+      <div class="ri-right"><span class="pill pill-b">${c.par||'—'} par</span></div>`;
+    el.appendChild(div);
+  });
+}
+
+function populateCourseSelect() {
+  const sel = document.getElementById('course-sel');
+  sel.innerHTML = '<option value="">No course / custom pars</option>';
+  LS.keys('course:').forEach(k => {
+    const c = LS.get(k);
+    if (c) { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; sel.appendChild(o); }
+  });
+}
+
+function onCourseSelect() {
+  const cid = document.getElementById('course-sel').value;
+  const wrap = document.getElementById('tee-sel-wrap');
+  if (!cid) {
+    wrap.style.display = 'none';
+    G.courseId = null; G.courseName = null; G.teeSet = null; G.holePars = null; G.holeHcps = null;
+    return;
+  }
+  const c = LS.get('course:' + cid);
+  if (!c) return;
+  G.courseId = c.id; G.courseName = c.name;
+  const tsel = document.getElementById('tee-sel');
+  tsel.innerHTML = '';
+  (c.teeSets||[]).forEach(t => {
+    const o = document.createElement('option');
+    o.value = t.name;
+    o.textContent = t.name + (t.rating ? ` (${t.rating}/${t.slope||''})` : '');
+    tsel.appendChild(o);
+  });
+  wrap.style.display = (c.teeSets||[]).length ? '' : 'none';
+  applyTeeData(c);
+}
+
+function onTeeSelect() {
+  const cid = document.getElementById('course-sel').value;
+  if (!cid) return;
+  const c = LS.get('course:' + cid);
+  if (c) applyTeeData(c);
+}
+
+function applyTeeData(c) {
+  G.teeSet = document.getElementById('tee-sel').value;
+  if (c.holeData && c.holeData.length) {
+    G.holePars = c.holeData.map(h => h.par);
+    G.holeHcps = c.holeData.map(h => h.hcp || 0);
+  }
+}
+
+// ─── Player setup ────────────────────────────────────────────────────────────
+function setMode(m) {
+  G.mode = m;
+  document.getElementById('mode-singles').classList.toggle('sel', m==='singles');
+  document.getElementById('mode-teams').classList.toggle('sel', m==='teams');
+  renderPlayers();
+}
+
+function setHoles(n, btn) {
+  G.holes = n;
+  document.querySelectorAll('.h-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+}
+
+function addPlayer() {
+  if (G.players.length >= 8) return;
+  const id = ++pidC;
+  G.players.push({ id, name: 'Player ' + id, hcp: 0, team: G.mode==='teams' ? (G.players.length%2===0?'A':'B') : null });
+  renderPlayers();
+  if (G.players.length >= 8) document.getElementById('add-p-btn').style.display = 'none';
+}
+
+function removePlayer(id) {
+  G.players = G.players.filter(p => p.id !== id);
+  document.getElementById('add-p-btn').style.display = '';
+  renderPlayers();
+}
+
+function renderPlayers() {
+  const list = document.getElementById('p-list');
+  list.innerHTML = '';
+  G.players.forEach((p, i) => {
+    const r = document.createElement('div');
+    r.className = 'p-row';
+    const tb = G.mode==='teams'
+      ? `<span class="pill ${p.team==='A'?'pill-b':'pill-a'}" style="cursor:pointer;flex-shrink:0" onclick="toggleTeam(${p.id})">T${p.team}</span>` : '';
+    r.innerHTML = `
+      <div class="avatar" style="background:${AC[i%AC.length]}">${(p.name||'P').charAt(0).toUpperCase()}</div>
+      <input type="text" value="${escH(p.name)}" oninput="upP(${p.id},'name',this.value)" placeholder="Name">
+      ${tb}
+      <span class="hcp-lbl">HCP</span>
+      <input type="number" min="0" max="54" value="${p.hcp}" oninput="upP(${p.id},'hcp',+this.value)">
+      <button class="rm-btn" onclick="removePlayer(${p.id})" aria-label="Remove player">×</button>`;
+    list.appendChild(r);
+  });
+}
+
+function toggleTeam(id) { const p = G.players.find(x=>x.id===id); if(p){p.team=p.team==='A'?'B':'A'; renderPlayers();} }
+function upP(id, k, v) { const p = G.players.find(x=>x.id===id); if(p) p[k]=v; }
+
+// ─── Round lifecycle ─────────────────────────────────────────────────────────
+function startRound() {
+  if (G.players.length < 2) { alert('Add at least 2 players'); return; }
+  if (G.mode==='teams') {
+    const a=G.players.filter(p=>p.team==='A').length, b=G.players.filter(p=>p.team==='B').length;
+    if (a!==b) { alert('Teams must have equal number of players'); return; }
+  }
+  G.scores = {}; G.results = {};
+  G.players.forEach(p => { G.scores[p.id] = new Array(G.holes).fill(null); });
+  G.id = 'r' + Date.now();
+  G.createdAt = Date.now(); G.updatedAt = Date.now(); G.finished = false;
+  saveRound();
+  buildScorecard();
+  updateStatus();
+  document.getElementById('sc-hdr').textContent = G.courseName || 'Scoring';
+  showScreen('s-scoring');
+  switchTab('scoring');
+}
+
+function saveRound() { G.updatedAt = Date.now(); LS.set('round:' + G.id, G); }
+
+function saveAndExit() { saveRound(); G = freshState(); pidC = 0; showScreen('s-home'); }
+
+function finishRound() {
+  if (!confirm('Mark this round as finished?')) return;
+  G.finished = true; saveRound(); showScreen('s-home');
+}
+
+function viewRound(id) {
+  const r = LS.get('round:' + id);
+  if (!r) return;
+  viewingRoundId = id;
+  document.getElementById('rv-title').textContent = r.courseName || 'Round';
+  const d = new Date(r.updatedAt || r.createdAt || Date.now());
+  document.getElementById('rv-sub').textContent = d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + (r.finished?'Finished':'In progress');
+  document.getElementById('rv-resume-btn').style.display = r.finished ? 'none' : '';
+  document.getElementById('rv-content').innerHTML = renderRoundDetail(r);
+  showScreen('s-round-view');
+}
+
+function renderRoundDetail(r) {
+  const pars = r.holePars || (r.holes===9 ? PAR9 : PAR18);
+  const hp = Object.keys(r.results||{}).length;
+  let s = '<div class="card">';
+  r.players.forEach((p,i) => {
+    const total = (r.scores[p.id]||[]).reduce((a,b)=>a+(b||0),0);
+    const parT = pars.slice(0,hp).reduce((a,b)=>a+b,0);
+    const diff = total - parT;
+    s += `<div class="info-row"><span class="info-l" style="display:flex;align-items:center;gap:6px">
+      <span style="width:10px;height:10px;border-radius:50%;background:${AC[i%AC.length]};display:inline-block"></span>
+      ${escH(p.name)}${r.mode==='teams'?' (T'+p.team+')':''}${p.hcp?` <span class="pill pill-gray">HCP ${p.hcp}</span>`:''}
+    </span><span class="info-v">${total||'—'} ${total?(diff===0?'E':diff>0?'+'+diff:''+diff):''}</span></div>`;
+  });
+  s += '</div>';
+  const st = getStanding(r.players, r.results, r.holes, r.mode);
+  s += '<div class="card trophy-area">';
+  if (r.finished) {
+    if (st.diff===0) s += '<div class="trophy-ico">🤝</div><div class="winner-nm">Match Halved</div><div class="winner-res">All Square</div>';
+    else s += `<div class="trophy-ico">🏆</div><div class="winner-nm">${escH(st.text.replace(/\d+UP/,'').trim())}</div><div class="winner-res">Wins ${st.diff>st.holesLeft?st.diff+'&'+st.holesLeft:st.diff+' UP'}</div>`;
+  } else {
+    s += `<div class="trophy-ico">⛳</div><div class="winner-nm">In progress</div><div class="winner-res">${escH(st.text)}</div>`;
+  }
+  s += '</div>';
+  if (r.courseName) s += `<div style="padding:0 0 8px"><span class="course-chip"><i class="ti ti-map-pin" style="font-size:13px"></i>${escH(r.courseName)}${r.teeSet?' · '+escH(r.teeSet)+' tees':''}</span></div>`;
+  return s;
+}
+
+function resumeRound() {
+  const r = LS.get('round:' + viewingRoundId);
+  if (!r) return;
+  G = r;
+  buildScorecard();
+  updateStatus();
+  document.getElementById('sc-hdr').textContent = r.courseName || 'Scoring';
+  showScreen('s-scoring');
+  switchTab('scoring');
+}
+
+function deleteRound() {
+  if (!viewingRoundId || !confirm('Delete this round?')) return;
+  LS.del('round:' + viewingRoundId);
+  viewingRoundId = null;
+  showScreen('s-home');
+}
+
+// ─── Course view ──────────────────────────────────────────────────────────────
+function viewCourse(id) {
+  const c = LS.get('course:' + id);
+  if (!c) return;
+  viewingCourseId = id;
+  document.getElementById('cv-title').textContent = c.name;
+  document.getElementById('cv-content').innerHTML = renderCourseDetail(c);
+  showScreen('s-course-view');
+}
+
+function renderCourseDetail(c) {
+  let s = `<div class="card">
+    <div class="info-row"><span class="info-l">Course name</span><span class="info-v">${escH(c.name)}</span></div>
+    <div class="info-row"><span class="info-l">Holes</span><span class="info-v">${c.holes||18}</span></div>
+    <div class="info-row"><span class="info-l">Par</span><span class="info-v">${c.par||'—'}</span></div>
+    <div class="info-row"><span class="info-l">Tee sets</span><span class="info-v">${(c.teeSets||[]).length}</span></div>
+  </div>`;
+  if ((c.teeSets||[]).length) {
+    s += '<div class="card"><div class="card-lbl">Tee sets</div>';
+    c.teeSets.forEach(t => {
+      const col = TEE_COLORS[t.name.toLowerCase()] || '#888';
+      s += `<div class="tee-row">
+        <div class="tee-color" style="background:${col}"></div>
+        <span style="font-size:14px;font-weight:500;flex:1">${escH(t.name)}</span>
+        ${t.rating ? `<span class="pill pill-gray">${t.rating} / ${t.slope||'—'}</span>` : ''}
+      </div>`;
+    });
+    s += '</div>';
+  }
+  if ((c.holeData||[]).length) {
+    const tees = (c.teeSets||[]).map(t=>t.name);
+    s += '<div class="card"><div class="card-lbl">Hole data</div><div class="sc-wrap"><table class="sc">';
+    s += '<thead><tr><th>H</th><th>Par</th><th>HCP</th>';
+    tees.forEach(t => s += `<th>${escH(t)}</th>`);
+    s += '</tr></thead><tbody>';
+    c.holeData.forEach(h => {
+      s += `<tr><td>${h.hole}</td><td>${h.par}</td><td>${h.hcp||'—'}</td>`;
+      tees.forEach(t => s += `<td>${(h.distances&&h.distances[t])||'—'}</td>`);
+      s += '</tr>';
+    });
+    s += '</tbody></table></div></div>';
+  }
+  return s;
+}
+
+function deleteCourse() {
+  if (!viewingCourseId || !confirm('Delete this course?')) return;
+  LS.del('course:' + viewingCourseId);
+  viewingCourseId = null;
+  showScreen('s-courses');
+}
+
+// ─── Scoring ──────────────────────────────────────────────────────────────────
+function getHcpStroke(player, holeIdx) {
+  if (!player.hcp) return 0;
+  const hcpOrder = G.holeHcps || (G.holes===9 ? HCP9 : HCP18);
+  return (hcpOrder[holeIdx] || holeIdx+1) <= player.hcp ? 1 : 0;
+}
+
+function getEffective(player, holeIdx) {
+  const raw = G.scores[player.id][holeIdx];
+  return raw === null ? null : raw - getHcpStroke(player, holeIdx);
+}
+
+function buildScorecard() {
+  const pars = G.holePars || (G.holes===9 ? PAR9 : PAR18);
+  const head = document.getElementById('sc-head');
+  const body = document.getElementById('sc-body');
+  let hh = '<tr><th style="width:22px">H</th><th style="width:22px">Par</th>';
+  G.players.forEach((p,i) => {
+    const init = p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    hh += `<th title="${escH(p.name)}">${init}${p.hcp?`<br><span style="font-size:8px;opacity:.7">+${p.hcp}</span>`:''}</th>`;
+  });
+  hh += '<th style="width:40px">Res</th></tr>';
+  head.innerHTML = hh;
+  body.innerHTML = '';
+  for (let h = 0; h < G.holes; h++) {
+    const tr = document.createElement('tr');
+    tr.id = 'hr-' + h;
+    let cells = `<td style="font-size:11px;color:var(--color-text2)">${h+1}</td><td style="font-size:11px;color:var(--color-text2)">${pars[h]}</td>`;
+    G.players.forEach(p => {
+      const sc = G.scores[p.id][h];
+      const dot = getHcpStroke(p, h) > 0 ? '<span class="stroke-dot" title="Stroke given"></span>' : '';
+      cells += `<td><div class="sc-inc">
+        <button class="sc-btn" onclick="adj(${p.id},${h},-1)">−</button>
+        <span class="sc-num" id="sn-${p.id}-${h}">${sc!==null?sc:'·'}</span>
+        <button class="sc-btn" onclick="adj(${p.id},${h},1)">+</button>
+      </div>${dot}</td>`;
+    });
+    cells += `<td style="font-size:11px" id="res-${h}">—</td>`;
+    tr.innerHTML = cells;
+    body.appendChild(tr);
+  }
+}
+
+function adj(pid, h, d) {
+  const pars = G.holePars || (G.holes===9?PAR9:PAR18);
+  const cur = G.scores[pid][h];
+  const nxt = (cur===null ? pars[h] : cur) + d;
+  if (nxt < 1 || nxt > 15) return;
+  G.scores[pid][h] = nxt;
+  const el = document.getElementById('sn-'+pid+'-'+h);
+  if (el) el.textContent = nxt;
+  updateHoleResult(h);
+  updateStatus();
+  updateSummary();
+  saveRound();
+}
+
+function updateHoleResult(h) {
+  const allIn = G.players.every(p => G.scores[p.id][h] !== null);
+  const cell = document.getElementById('res-'+h);
+  const row  = document.getElementById('hr-'+h);
+  if (!cell) return;
+  row.className = ''; cell.textContent = '—';
+  if (!allIn) return;
+  if (G.mode==='singles' && G.players.length===2) {
+    const e0=getEffective(G.players[0],h), e1=getEffective(G.players[1],h);
+    if (e0<e1) { cell.textContent=G.players[0].name.split(' ')[0]; row.className='won-r'; G.results[h]=G.players[0].id; }
+    else if (e1<e0) { cell.textContent=G.players[1].name.split(' ')[0]; row.className='lost-r'; G.results[h]=G.players[1].id; }
+    else { cell.textContent='½'; row.className='halv-r'; G.results[h]='halved'; }
+  } else if (G.mode==='teams') {
+    const a=G.players.filter(p=>p.team==='A'), b=G.players.filter(p=>p.team==='B');
+    const ba=Math.min(...a.map(p=>getEffective(p,h)??99)), bb=Math.min(...b.map(p=>getEffective(p,h)??99));
+    if (ba<bb) { cell.textContent='T·A'; row.className='won-r'; G.results[h]='A'; }
+    else if (bb<ba) { cell.textContent='T·B'; row.className='lost-r'; G.results[h]='B'; }
+    else { cell.textContent='½'; row.className='halv-r'; G.results[h]='halved'; }
+  } else {
+    const eff = G.players.map(p=>({p, e:getEffective(p,h)}));
+    const mn = Math.min(...eff.map(x=>x.e));
+    const ws = eff.filter(x=>x.e===mn);
+    if (ws.length===1) { cell.textContent=ws[0].p.name.split(' ')[0]; row.className='won-r'; G.results[h]=ws[0].p.id; }
+    else { cell.textContent='½'; row.className='halv-r'; G.results[h]='halved'; }
+  }
+}
+
+function getStanding(players, results, holes, mode) {
+  results = results||{};
+  const hp = Object.keys(results).length;
+  const hl = holes - hp;
+  if (mode==='singles' && players.length===2) {
+    let a=0,b=0;
+    for(let h=0;h<holes;h++){const r=results[h];if(r===players[0].id)a++;else if(r===players[1].id)b++;}
+    const diff=a-b;
+    if(diff>0) return {text:players[0].name.split(' ')[0]+' '+diff+'UP',lead:players[0].id,diff,holesLeft:hl};
+    if(diff<0) return {text:players[1].name.split(' ')[0]+' '+Math.abs(diff)+'UP',lead:players[1].id,diff:Math.abs(diff),holesLeft:hl};
+    return {text:'All Square',lead:null,diff:0,holesLeft:hl};
+  } else if (mode==='teams') {
+    let a=0,b=0;
+    for(let h=0;h<holes;h++){const r=results[h];if(r==='A')a++;else if(r==='B')b++;}
+    const diff=a-b;
+    if(diff>0) return {text:'Team A '+diff+'UP',lead:'A',diff,holesLeft:hl};
+    if(diff<0) return {text:'Team B '+Math.abs(diff)+'UP',lead:'B',diff:Math.abs(diff),holesLeft:hl};
+    return {text:'All Square',lead:null,diff:0,holesLeft:hl};
+  } else {
+    const cnt={};players.forEach(p=>cnt[p.id]=0);
+    for(let h=0;h<holes;h++){const r=results[h];if(r&&r!=='halved')cnt[r]=(cnt[r]||0)+1;}
+    const top=[...players].sort((a,b)=>(cnt[b.id]||0)-(cnt[a.id]||0))[0];
+    return {text:top.name.split(' ')[0]+' leads ('+(cnt[top.id]||0)+' holes)',lead:top.id,diff:cnt[top.id]||0,holesLeft:hl};
+  }
+}
+
+function updateStatus() {
+  const s = getStanding(G.players, G.results, G.holes, G.mode);
+  const main=document.getElementById('sb-main'), sub=document.getElementById('sb-sub'), pill=document.getElementById('sb-pill');
+  if(main) main.textContent = s.text;
+  if(sub)  sub.textContent  = s.holesLeft>0 ? s.holesLeft+' hole'+(s.holesLeft!==1?'s':'')+' remaining' : 'Round complete';
+  if(pill) { pill.textContent=s.diff>0?s.diff+'UP':'AS'; pill.className='match-pill '+(s.diff>0?'mp-up':'mp-as'); }
+  let nxt=G.holes;
+  for(let h=0;h<G.holes;h++){if(G.players.some(p=>G.scores[p.id][h]===null)){nxt=h+1;break;}}
+  const sub2=document.getElementById('sc-sub'); if(sub2) sub2.textContent='Hole '+nxt+' of '+G.holes;
+}
+
+function updateSummary() {
+  const s  = getStanding(G.players, G.results, G.holes, G.mode);
+  const hp = Object.keys(G.results).length;
+  const pars = G.holePars || (G.holes===9?PAR9:PAR18);
+  const res = document.getElementById('sum-result');
+  const det = document.getElementById('sum-detail');
+  if (!res) return;
+  const done = hp===G.holes || (s.diff>0 && s.diff>s.holesLeft);
+  let rh = `<div class="trophy-ico">${done?'🏆':'⛳'}</div>`;
+  if (done && s.diff===0) rh += '<div class="winner-nm">Match Halved</div><div class="winner-res">All Square</div>';
+  else if (done) rh += `<div class="winner-nm">${escH(s.text.replace(/\d+UP/,'').trim())}</div><div class="winner-res">Wins ${s.diff>s.holesLeft?s.diff+'&'+s.holesLeft:s.diff+' UP'}</div>`;
+  else rh += `<div class="winner-nm">In progress</div><div class="winner-res">${escH(s.text)}</div><div style="font-size:12px;color:var(--color-text2)">${hp} of ${G.holes} holes</div>`;
+  res.innerHTML = rh;
+  let dh = '<div class="card-lbl">Scorecards</div>';
+  G.players.forEach((p,i) => {
+    const total = G.scores[p.id].reduce((a,b)=>a+(b||0),0);
+    const parT  = pars.slice(0,hp).reduce((a,b)=>a+b,0);
+    const diff  = total - parT;
+    dh += `<div class="info-row">
+      <span class="info-l" style="display:flex;align-items:center;gap:6px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${AC[i%AC.length]};display:inline-block"></span>
+        ${escH(p.name)}${G.mode==='teams'?' (T'+p.team+')':''}
+      </span>
+      <span class="info-v">${total||'—'}${total?' '+(diff===0?'E':diff>0?'+'+diff:''+diff):''}</span>
+    </div>`;
+  });
+  det.innerHTML = dh;
+}
+
+function switchTab(tab) {
+  document.getElementById('scoring-content').style.display = tab==='scoring'?'':'none';
+  document.getElementById('tab-summary').style.display    = tab==='summary'?'':'none';
+  document.getElementById('nav-score').classList.toggle('on', tab==='scoring');
+  document.getElementById('nav-sum').classList.toggle('on',   tab==='summary');
+  if (tab==='summary') updateSummary();
+}
+
+// ─── Scan / AI ────────────────────────────────────────────────────────────────
+function handleScanFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    scanImageB64 = e.target.result.split(',')[1];
+    document.getElementById('scan-preview').innerHTML =
+      `<img src="${e.target.result}" style="width:100%;border-radius:var(--radius);margin-bottom:10px;max-height:220px;object-fit:contain">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runScan() {
+  const txt = document.getElementById('scan-text').value.trim();
+  if (!scanImageB64 && !txt) { alert('Please upload an image or paste scorecard text first.'); return; }
+  const statusEl = document.getElementById('scan-status');
+  const resultEl = document.getElementById('scan-result');
+  statusEl.innerHTML = '<div class="ai-bubble ai-info"><span class="spinner"></span>Analyzing scorecard with AI…</div>';
+  resultEl.innerHTML = '';
+  document.getElementById('scan-btn').disabled = true;
+
+  const SYSTEM = `You are a golf scorecard data extractor. Extract course information and return ONLY valid JSON with this exact structure (no markdown, no preamble):
+{
+  "name": "Course Name",
+  "holes": 18,
+  "par": 72,
+  "teeSets": [
+    {"name": "Black", "rating": "74.2", "slope": "138"},
+    {"name": "Blue", "rating": "72.1", "slope": "131"}
+  ],
+  "holeData": [
+    {"hole": 1, "par": 4, "hcp": 7, "distances": {"Black": 425, "Blue": 398}},
+    {"hole": 2, "par": 3, "hcp": 15, "distances": {"Black": 185, "Blue": 165}}
+  ]
+}
+Rules: teeSets includes every tee color/name found. distances keys must exactly match teeSet names. hcp is the handicap stroke index for the hole (1=hardest). If any value is unknown use null. Include ALL holes found.`;
+
+  const messages = scanImageB64
+    ? [{ role:'user', content:[
+        {type:'image', source:{type:'base64', media_type:'image/jpeg', data:scanImageB64}},
+        {type:'text', text:'Extract all course data from this golf scorecard image.'}
+      ]}]
+    : [{ role:'user', content:'Extract all course data from this golf scorecard text:\n\n' + txt }];
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:2000, system:SYSTEM, messages })
+    });
+    const data = await resp.json();
+    const raw = (data.content||[]).map(c=>c.text||'').join('');
+    let course;
+    try { course = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+    catch { statusEl.innerHTML='<div class="ai-bubble ai-err">Could not parse AI response. Try pasting text instead.</div>'; return; }
+    course.id = 'c' + Date.now();
+    LS.set('course:' + course.id, course);
+    statusEl.innerHTML = '<div class="ai-bubble ai-ok"><i class="ti ti-check" style="margin-right:6px"></i>Course saved!</div>';
+    resultEl.innerHTML = renderCourseDetail(course) + `<button class="btn btn-p" style="margin-top:8px" onclick="showScreen('s-courses')">View all courses →</button>`;
+    scanImageB64 = null;
+    document.getElementById('scan-text').value = '';
+    document.getElementById('scan-preview').innerHTML = '';
+  } catch(e) {
+    statusEl.innerHTML = `<div class="ai-bubble ai-err">Error: ${escH(e.message)}</div>`;
+  } finally {
+    document.getElementById('scan-btn').disabled = false;
+  }
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+function escH(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+showScreen('s-home');
+addPlayer(); addPlayer(); renderPlayers();
+</script>
+</body>
+</html>
